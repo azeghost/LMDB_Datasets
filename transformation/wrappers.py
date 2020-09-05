@@ -3,7 +3,10 @@ import numpy as np
 #Wrapper class for dataset
 class DatasetWrapper:
     def __init__(self, image, labels_dict):
-        self.channels = image.shape[2]
+        try:
+            self.channels = image.shape[2]
+        except:
+            self.channels = 1
         self.size = image.shape[:2]
         self.image = image.tobytes()
         for k, val in labels_dict.items():

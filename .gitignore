@@ -1,0 +1,11 @@
+/.data/.test/
+/.data/MNIST_LMDB/
+/.data/Pokemon_LMDB/
+/.data/mnist.npz
+/.data/mnist.tar.bz
+/.data/mnist_combined.tar.bz
+/.data/pokemon.tar.bz
+/.data/pokemon_combined.tar.bz
+/notebooks/.ipynb_checkpoints/
+/.idea/
+*.pyc
