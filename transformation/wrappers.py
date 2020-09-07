@@ -11,7 +11,6 @@ class DatasetWrapper:
         self.image = image.tobytes()
         for k, val in labels_dict.items():
             exec(f'self.{k}={val}')
-        # self.label = label #additional data to be stored (make it string)
 
     def get_image(self):
         """ Returns the image as a numpy array. """

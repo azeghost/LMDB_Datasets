@@ -20,8 +20,7 @@ def read_lmdb(lmdb_dir, num_images):
         # We could split this up into multiple transactions if needed
         for image_id in range(num_images):
             data = txn.get(f"{image_id:08}".encode("ascii"))
-            # Remember that it's a CIFAR_Image object
-            # that is stored as the value
+
             dataset = pickle.loads(data)
             images.append(dataset.get_image())
             labels_list = [attr for attr in dir(dataset) if
@@ -29,8 +28,13 @@ def read_lmdb(lmdb_dir, num_images):
                            (not attr in ['image', 'channels', 'size'])]
 
             for label in labels_list:
-                _lab = {label: eval(f'dataset.{label}')}
-                labels = {**labels, **_lab}
+                # _lab = {label: eval(f'dataset.{label}')}
+                # labels = {**labels, **_lab}
+                if label in labels:
+                    labels[label].append(eval(f'dataset.{label}'))
+                else:
+                    labels = {label: [eval(f'dataset.{label}')] }
+
 
     env.close()
     return {'images': images, **labels}

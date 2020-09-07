@@ -47,7 +47,7 @@ class LmdbTransformer:
         for idx, (image, label) in tqdm(enumerate(zip(images, labels)), total=num_images):
             img = np.float32(image) / self.scaler
 
-            self.store_single_lmdb(index=index, filename=lmdb_name, img=img, labels_dict={'label': label},
+            self.store_single_lmdb(index=index, filename=lmdb_name, img=img, labels_dict={'label1': str(label)},
                                    num_images=num_images)
             index = index + 1
 
