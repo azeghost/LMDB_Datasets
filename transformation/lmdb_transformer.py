@@ -46,8 +46,8 @@ class LmdbTransformer:
         if file_idx is None:
             index = 0
         else:
-            index = file_idx * num_images
-        print('Storing ' + str(num_images) + lmdb_dir + '_{}'.format(category))
+            index = file_idx * 10000
+        # print('Storing ' + str(num_images) + lmdb_dir + '_{}'.format(category))
         for idx, (image, latents_val) in tqdm(enumerate(zip(images, labels_values)), total=num_images):
             img = np.float32(image) / self.scaler
 
