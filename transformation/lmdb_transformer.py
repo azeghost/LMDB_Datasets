@@ -37,7 +37,7 @@ class LmdbTransformer:
 
         env.close()
 
-    def transform_store_from_numpy(self, images, labels_values, labels_names, lmdb_dir='.data/', category='training',
+    def transform_store_from_numpy(self, images, labels_values, labels_names, labels_classes=None, lmdb_dir='.data/', category='training',
                                    total_number_imgs=0, file_idx = None):
 
         create_if_not_exist(lmdb_dir)
@@ -48,16 +48,29 @@ class LmdbTransformer:
         else:
             index = file_idx * 10000
         # print('Storing ' + str(num_images) + lmdb_dir + '_{}'.format(category))
-        for idx, (image, latents_val) in tqdm(enumerate(zip(images, labels_values)), total=num_images):
-            img = np.float32(image) / self.scaler
+        if labels_classes is None:
+            for idx, (image, latents_val) in tqdm(enumerate(zip(images, labels_values)), total=num_images):
+                img = np.float32(image) / self.scaler
 
-            labels_dict = {}
-            for i, A in enumerate(labels_names):
-                labels_dict[A] = latents_val[i]
+                labels_dict = {}
+                for i, A in enumerate(labels_names):
+                    labels_dict[A] = latents_val[i]
 
-            self.store_single_lmdb(index=index, filename=lmdb_name, img=img, labels_dict=labels_dict,
-                                   num_images=total_number_imgs)
-            index = index + 1
+                self.store_single_lmdb(index=index, filename=lmdb_name, img=img, labels_dict=labels_dict,
+                                       num_images=total_number_imgs)
+                index = index + 1
+        else:
+            for idx, (image, latents_val, labels_class) in tqdm(enumerate(zip(images, labels_values, labels_classes)), total=num_images):
+                img = np.float32(image) / self.scaler
+
+                labels_dict = {}
+                for i, A in enumerate(labels_names):
+                    labels_dict[f'{A}_value'] = latents_val[i]
+                    labels_dict[f'{A}_class'] = labels_class[i]
+
+                self.store_single_lmdb(index=index, filename=lmdb_name, img=img, labels_dict=labels_dict,
+                                       num_images=total_number_imgs)
+                index = index + 1
 
     def transform_store(self, image_dir, labels_fn,
                         lmdb_dir='.data/', category='training', target_size=None,
