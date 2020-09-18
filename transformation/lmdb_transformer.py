@@ -109,10 +109,12 @@ class LmdbTransformer:
 
     def save_metadata(self, file, info_dict):
         info = json.dumps(info_dict, cls=NumpyEncoder)
+        file = file + os.sep + 'meta_info.json'
         with open(file, 'w') as outfile:
             json.dump(info, outfile)
 
     def get_metadata(self, file):
+        file = file + os.sep + 'meta_info.json'
         with open(file) as json_file:
             data = json.load(json_file)
             data_dict = json.loads(data)
