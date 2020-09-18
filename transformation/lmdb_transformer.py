@@ -1,6 +1,7 @@
 import os
 import pickle
 import numpy as np
+import json
 
 from tqdm import tqdm
 import lmdb
@@ -10,6 +11,7 @@ from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from transformation.file_image_generator import create_image_lists
 from transformation.file_utils import get_file_path, create_if_not_exist
 from transformation.wrappers import DatasetWrapper
+from transformation.data_utils import NumpyEncoder
 
 
 class LmdbTransformer:
@@ -37,8 +39,9 @@ class LmdbTransformer:
 
         env.close()
 
-    def transform_store_from_numpy(self, images, labels_values, labels_names, labels_classes=None, lmdb_dir='.data/', category='training',
-                                   total_number_imgs=0, file_idx = None):
+    def transform_store_from_numpy(self, images, labels_values, labels_names, labels_classes=None, lmdb_dir='.data/',
+                                   category='training',
+                                   total_number_imgs=0, file_idx=None):
 
         create_if_not_exist(lmdb_dir)
         num_images = images.shape[0]
@@ -60,7 +63,8 @@ class LmdbTransformer:
                                        num_images=total_number_imgs)
                 index = index + 1
         else:
-            for idx, (image, latents_val, labels_class) in tqdm(enumerate(zip(images, labels_values, labels_classes)), total=num_images):
+            for idx, (image, latents_val, labels_class) in tqdm(enumerate(zip(images, labels_values, labels_classes)),
+                                                                total=num_images):
                 img = np.float32(image) / self.scaler
 
                 labels_dict = {}
@@ -102,3 +106,14 @@ class LmdbTransformer:
                 label = labels_fn(img_path)
                 name = lmdb_dir + os.sep + '_{}'.format(category)
                 self.store_single_lmdb(index=index, filename=name, img=img, labels_dict=label, num_images=num_images)
+
+    def save_metadata(self, file, info_dict):
+        info = json.dumps(info_dict, cls=NumpyEncoder)
+        with open(file, 'w') as outfile:
+            json.dump(info, outfile)
+
+    def get_metadata(self, file):
+        with open(file) as json_file:
+            data = json.load(json_file)
+            data_dict = json.loads(data)
+            return data_dict

@@ -1,6 +1,7 @@
 import tensorflow as tf
 import six
-
+import json
+import numpy as np
 
 def get_shape(image_size, color_mode='rgb', data_format=tf.keras.backend.image_data_format()):
     if color_mode == 'rgb':
@@ -49,6 +50,11 @@ def array_to_generator(x, y=None, batch_size=32):
 
     return tf.data.Dataset.from_tensor_slices(data).shuffle(x.shape[0]).batch(batch_size)
 
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
 
 
 
