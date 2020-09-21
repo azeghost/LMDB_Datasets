@@ -10,7 +10,7 @@ class DatasetWrapper:
         self.size = image.shape[:2]
         self.image = image.tobytes()
         for k, val in labels_dict.items():
-            exec(f'self.{k}={str(val)}')
+            exec("self.{} = '{}'".format(k, str(val)))
 
     def get_image(self):
         """ Returns the image as a numpy array. """
