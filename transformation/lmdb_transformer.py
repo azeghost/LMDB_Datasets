@@ -17,7 +17,7 @@ from transformation.data_utils import NumpyEncoder
 class LmdbTransformer:
     def __init__(self, validation_pct, valid_image_formats, image_dir=None, data_format=None, scalar=255.0):
         if image_dir is not None:
-            self.image_lists = create_image_lists(image_dir, validation_pct, valid_image_formats)
+            self.image_lists = create_image_lists(image_dir, validation_pct, valid_image_formats, verbose=0 , sequenced = True)
         self.scaler = scalar
         if data_format is None:
             self.data_format = K.image_data_format()
@@ -27,7 +27,7 @@ class LmdbTransformer:
     def store_single_lmdb(self, filename, img, index, labels_dict, num_images):
         """ Stores a wrapper to LMDB.
         """
-        map_size = num_images * img.nbytes * 10
+        map_size = num_images * img.nbytes * 5
         env = lmdb.open(filename, map_size=map_size)
 
         # Same as before — but let's write all the images in a single transaction
@@ -82,13 +82,20 @@ class LmdbTransformer:
         create_if_not_exist(lmdb_dir)
 
         classes = list(self.image_lists.keys())
+        
+        total_number_of_img = 0
+        for label_name in classes:
+            total_number_of_img += len(self.image_lists[label_name][category])
+        print('Total number of imgs for catagory '+str(total_number_of_img))
         num_class = len(classes)
         class2id = dict(zip(classes, range(len(classes))))
         id2class = dict((v, k) for k, v in class2id.items())
 
+        lmdb_index = 0
         for label_name in classes:
             num_images = len(self.image_lists[label_name][category])
-            print('Storing ' + str(num_images) + lmdb_dir + os.sep + '_{}'.format(category))
+            print('Storing ' + str(num_images) + lmdb_dir + os.sep + 'into _{} from folder {}'.format(category,  label_name))
+
             for index, _ in enumerate(self.image_lists[label_name][category]):
                 img_path = get_file_path(self.image_lists,
                                          label_name,
@@ -103,9 +110,11 @@ class LmdbTransformer:
                         target_size=target_size
                     ), data_format=self.data_format
                 ) / self.scaler
-                label = labels_fn(img_path)
+                label_dict = labels_fn(img_path)
                 name = lmdb_dir + os.sep + '_{}'.format(category)
-                self.store_single_lmdb(index=index, filename=name, img=img, labels_dict=label, num_images=num_images)
+                lmdb_index += 1
+                self.store_single_lmdb(index=lmdb_index, filename=name, img=img, labels_dict=label_dict,
+                                       num_images=total_number_of_img)
 
     def save_metadata(self, file, info_dict):
         info = json.dumps(info_dict, cls=NumpyEncoder)
