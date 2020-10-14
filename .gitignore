@@ -10,3 +10,8 @@
 /.idea/
 *.pyc
 /.data/.test_Mnist/
+/.data/Anime_Faces_LMDB/
+/.data/Pacman_LMDB/
+/.data/SmallNORB_LMDB/
+/.data/imagenet_LMDB/_train/
+/.vscode/
